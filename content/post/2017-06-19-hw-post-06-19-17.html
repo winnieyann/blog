@@ -69,18 +69,18 @@ fancyRpartPlot(fit)</code></pre>
 table(test1$predict, test1$rating)</code></pre>
 <pre><code>##           
 ##             G NR PG PG-13  R TV-14 TV-G TV-MA TV-PG TV-Y TV-Y7 TV-Y7-FV UR
-##   G        16  0  0     0  0     0    0     0     0    0     0        0  0
-##   NR        0  2  0     0  0     0    0     0     0    0     0        0  0
-##   PG        0  0 43     0  0     0    0     0     0    0     0        0  0
+##   G        22  0  0     0  0     0    2     0     0    0     0        0  0
+##   NR        0  3  0     0  0     0    0     0     0    0     0        0  0
+##   PG        0  0 27     0  0     0    0     0     0    0     0        0  0
 ##   PG-13     0  0  0     4  0     0    0     0     0    0     0        0  0
-##   R         0  0  0     0  5     0    0     0     0    0     0        0  0
-##   TV-14     0  0  0     0  0    47    0     0     0    0     0        0  0
-##   TV-G      3  0  0     0  0     0    8     0     0    0     0        0  0
-##   TV-MA     0  0  0     0  0     0    0    22     0    0     0        0  0
-##   TV-PG     0  0  0     0  0     0    0     0    14    0     0        0  0
-##   TV-Y      0  0  0     0  0     0    0     0     0   17     0        0  0
-##   TV-Y7     0  0  0     0  0     0    0     0     0    0     6        0  0
-##   TV-Y7-FV  0  0  0     0  0     0    0     0     0    0     0       13  0
+##   R         0  0  0     0  7     0    0     0     0    0     0        0  0
+##   TV-14     0  0  0     0  0    36    0     0     0    0     0        0  0
+##   TV-G      5  0  0     0  0     0    7     0     0    0     0        0  0
+##   TV-MA     0  0  0     0  0     0    0    44     0    0     0        0  0
+##   TV-PG     0  0  0     0  0     0    0     0    12    0     0        0  0
+##   TV-Y      0  0  0     0  0     0    0     0     0   15     0        0  0
+##   TV-Y7     0  0  0     0  0     0    0     0     0    0     9        0  0
+##   TV-Y7-FV  0  0  0     0  0     0    0     0     0    0     0        7  0
 ##   UR        0  0  0     0  0     0    0     0     0    0     0        0  0</code></pre>
 </div>
 <div id="using-artifical-neural-networks" class="section level2">
@@ -118,7 +118,7 @@ form &lt;- as.formula(paste(&quot;user_rating_score ~&quot;, paste(n, collapse =
 nn &lt;- neuralnet(form,data=train.s,hidden=c(5,3),linear.output=T, stepmax = 10^6)
 plot(nn)</code></pre>
 <div class="figure">
-<img src="/static/images/plot.png" alt="Artifical Neutral Networks Plot" />
+<img src="/images/plot.png" alt="Artifical Neutral Networks Plot" />
 <p class="caption">Artifical Neutral Networks Plot</p>
 </div>
 <pre class="r"><code># Compute() in neuralnet pkg predicts the results using the neural network
@@ -133,5 +133,5 @@ test.r &lt;- (test.s$user_rating_score)*(max(netflix2$user_rating_score)-min(net
 #now we calculate the Mean Squared Error
 MSE.nn &lt;- sum((test.r - pr.nn_)^2)/nrow(test.s)
 MSE.nn</code></pre>
-<pre><code>## [1] 143.0844108</code></pre>
+<pre><code>## [1] 135.276787</code></pre>
 </div>

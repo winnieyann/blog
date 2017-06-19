@@ -133,7 +133,7 @@ form <- as.formula(paste("user_rating_score ~", paste(n, collapse = " + ")))
 nn <- neuralnet(form,data=train.s,hidden=c(5,3),linear.output=T, stepmax = 10^6)
 plot(nn)
 ```
-![Artifical Neutral Networks Plot](/static/images/plot.png)
+![Artifical Neutral Networks Plot](/images/plot.png)
 ```{r}
 
 # Compute() in neuralnet pkg predicts the results using the neural network
