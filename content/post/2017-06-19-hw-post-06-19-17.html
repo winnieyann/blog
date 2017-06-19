@@ -1,0 +1,137 @@
+---
+title: HW POST 06/19/17
+author: Winnie Yan
+date: '2017-06-19'
+slug: hw-post-06-19-17
+categories: []
+tags: []
+menu:
+  main:
+    parent: x
+weight: 5
+---
+
+
+
+<div id="introducing-the-dataset" class="section level2">
+<h2>Introducing the dataset</h2>
+<p>Recently, Netflix has become one of the most common and popular platforms where people watch movies and TV shows. Chase Willden, the creator of this dataset, gathered the data to understand the rating distributions of Netflix shows. Please note that because Willden took advantage of the Netflix’s suggestion engine to gather the data of the 1000 shows, the sample might be biased. For more information, please checkout the original website: <a href="https://data.world/chasewillden/netflix-shows" class="uri">https://data.world/chasewillden/netflix-shows</a></p>
+<pre class="r"><code>library(readxl)</code></pre>
+<pre><code>## Warning: package &#39;readxl&#39; was built under R version 3.3.2</code></pre>
+<pre class="r"><code>netflix &lt;- read_excel(&quot;/users/men/Desktop/IX/netflix.xlsx&quot;)</code></pre>
+</div>
+<div id="cleaning-up-the-dataset" class="section level2">
+<h2>Cleaning up the dataset</h2>
+<p>There are 7 variables in the dataset: title, rating, ratingLevel, ratingDescription, release year, user rating score, user rating size. - titile: a character variable that describes the title of the show - rating: a character variable that describes the rating of the show. It is changed to factor because the values in this variable represent 13 levels of ratings. - ratingLevel:a character vairable of the rating description on Netflix. - ratingDescription: a numeric variable that puts the rating descriptions on a numeric scale - release year: a numeric variable that describes the year when the shows are released - user rating score: a character variable that describes the user rating scores. It is changed to a numeric vector. - user rating size: a numeric variable that describes the total user ratings</p>
+<p>I also changed the last 3 columns names because they all have spaces in them.</p>
+<pre class="r"><code>#change ratings column to factor
+netflix$rating &lt;- as.factor(netflix$rating)
+#change user rating score to numeric
+netflix$`user rating score` &lt;- as.numeric(netflix$`user rating score`)</code></pre>
+<pre><code>## Warning: NAs introduced by coercion</code></pre>
+<pre class="r"><code>#getting rid of the space in the column names
+colnames(netflix)[5] &lt;- &quot;release_year&quot;
+colnames(netflix)[6] &lt;- &quot;user_rating_score&quot;
+colnames(netflix)[7] &lt;- &quot;user_rating_size&quot;</code></pre>
+</div>
+<div id="plotting-and-exploring-the-dataset" class="section level2">
+<h2>Plotting and exploring the dataset</h2>
+<p>My first bar plot explores the frequency of each ratings. As we can see, the sample consists mostly of shows with the ratings “G”, “PG”, “TV-14”, and “TV-MA”.</p>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 3.3.2</code></pre>
+<p><img src="/post/2017-06-19-hw-post-06-19-17_files/figure-html/pressure-1.png" width="672" /></p>
+<p>My second scatter point plot explores the relationship between the release year and the user rating score. From the graph, we are able to see that movies of every single year has a wide range of user rating socres. There are more movies released in recent years as well. Different colors represent different ratings; however, it is hard to tell from this plot if either release year or user rating score is related to rating because we have different color dots spreading throughout the plot.</p>
+<pre class="r"><code>ggplot(data = netflix, aes(x=release_year, y=user_rating_score, color=rating)) + geom_point() + ggtitle(&quot;Release Year vs User Rating Score&quot;)</code></pre>
+<pre><code>## Warning: Removed 395 rows containing missing values (geom_point).</code></pre>
+<p><img src="/post/2017-06-19-hw-post-06-19-17_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Our third histogram explores the frenquency of user rating size, which is the total user rating. The plot shows that the user rating size is 80, 81 or 82. Movies of user rating size 81 only consists of PG movies, while movies of user rating size 80 and 82 have a variety of rating.</p>
+<pre class="r"><code>ggplot(data=netflix, aes(x=user_rating_size, fill=rating)) + geom_histogram() + ggtitle(&quot;Frequency of User Rating Size&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/post/2017-06-19-hw-post-06-19-17_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="building-a-decision-tree" class="section level2">
+<h2>Building a decision tree</h2>
+<p>I decide to build a decision tree model to predict the rating of the movies. I randomly split my data (80% and 20%) into a training set and a test set. I use the training set to build my decision tree, and then I use it to predict the test set. The test result is very satisfying because it only made 2 mistakes out of a total 200 predictions.</p>
+<pre class="r"><code>library(rpart)
+library(rattle)</code></pre>
+<pre><code>## Rattle: A free graphical interface for data mining with R.
+## Version 4.1.0 Copyright (c) 2006-2015 Togaware Pty Ltd.
+## Type &#39;rattle()&#39; to shake, rattle, and roll your data.</code></pre>
+<pre class="r"><code>#We split the dataset into a training set and a test set
+index1 &lt;- sample(1:nrow(netflix),round(0.8*nrow(netflix)))
+train1 &lt;- netflix[index1,]
+test1 &lt;- netflix[-index1,]
+
+#We build our decision tree
+fit &lt;- rpart(rating ~ user_rating_size + release_year + user_rating_score + ratingDescription, data = train1)
+fancyRpartPlot(fit)</code></pre>
+<p><img src="/post/2017-06-19-hw-post-06-19-17_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>test1$predict &lt;- predict(fit, test1, type = &quot;class&quot;)
+table(test1$predict, test1$rating)</code></pre>
+<pre><code>##           
+##             G NR PG PG-13  R TV-14 TV-G TV-MA TV-PG TV-Y TV-Y7 TV-Y7-FV UR
+##   G        16  0  0     0  0     0    0     0     0    0     0        0  0
+##   NR        0  2  0     0  0     0    0     0     0    0     0        0  0
+##   PG        0  0 43     0  0     0    0     0     0    0     0        0  0
+##   PG-13     0  0  0     4  0     0    0     0     0    0     0        0  0
+##   R         0  0  0     0  5     0    0     0     0    0     0        0  0
+##   TV-14     0  0  0     0  0    47    0     0     0    0     0        0  0
+##   TV-G      3  0  0     0  0     0    8     0     0    0     0        0  0
+##   TV-MA     0  0  0     0  0     0    0    22     0    0     0        0  0
+##   TV-PG     0  0  0     0  0     0    0     0    14    0     0        0  0
+##   TV-Y      0  0  0     0  0     0    0     0     0   17     0        0  0
+##   TV-Y7     0  0  0     0  0     0    0     0     0    0     6        0  0
+##   TV-Y7-FV  0  0  0     0  0     0    0     0     0    0     0       13  0
+##   UR        0  0  0     0  0     0    0     0     0    0     0        0  0</code></pre>
+</div>
+<div id="using-artifical-neural-networks" class="section level2">
+<h2>Using Artifical Neural Networks</h2>
+<p>I then want to use Artificial Neural Networks to make predictions because the data in the dataset is based on people’s opinion, and it would be interesting to see how this type of machine learning, which supposedly mimics how human brain works, would take on our dataset. I build the model to predict the user rating scores because Artificial Neural Netowrks works only with numeric data. Special shoutout to Rohan, Griffin and Connor for an awesome lecture and tutorial! Unfortunately, Artifical Neural Networks do not seem to be the best model for my dataset because the mean squared error is extremely high.</p>
+<pre class="r"><code>library(neuralnet)
+
+# We are going to make a neural network to predict the user rating score
+# We need a new dataframe with only numeric columns
+netflix2 &lt;- netflix[,4:6]
+
+# We also need to ensure that there are no NA in our dataset
+netflix2 &lt;- netflix2[!is.na(netflix2$user_rating_score),]
+
+# Split into test and train data
+index2 &lt;- sample(1:nrow(netflix2),round(0.8*nrow(netflix2)))
+train2 &lt;- netflix2[index2,]
+test2 &lt;- netflix2[-index2,]
+
+# Now we are going to normalize our data
+maxs &lt;- apply(netflix2, 2, max)
+mins &lt;- apply(netflix2, 2, min)
+
+# Now we are going to scale our data
+scaled &lt;- as.data.frame(scale(netflix2, center = mins, scale = maxs - mins))
+
+train.s &lt;- scaled[index2,]
+test.s &lt;- scaled[-index2,]
+
+# Now we are going ot train the neural network
+# the neural network function cannot accept formulas in the traditional R manner (y~.)
+# We get around this by doing the following:
+n &lt;- names(train.s[,-3])
+form &lt;- as.formula(paste(&quot;user_rating_score ~&quot;, paste(n, collapse = &quot; + &quot;)))
+nn &lt;- neuralnet(form,data=train.s,hidden=c(5,3),linear.output=T, stepmax = 10^6)
+plot(nn)</code></pre>
+<div class="figure">
+<img src="/static/images/plot.png" alt="Artifical Neutral Networks Plot" />
+<p class="caption">Artifical Neutral Networks Plot</p>
+</div>
+<pre class="r"><code># Compute() in neuralnet pkg predicts the results using the neural network
+pr.nn &lt;- compute(nn,test.s[,-3])
+
+# Now we need to scale back our values
+pr.nn_ &lt;- pr.nn$net.result*(max(netflix2$user_rating_score)-min(netflix2$user_rating_score))+min(netflix2$user_rating_score)
+
+#This is the real values of the test data
+test.r &lt;- (test.s$user_rating_score)*(max(netflix2$user_rating_score)-min(netflix2$user_rating_score))+min(netflix2$user_rating_score)
+
+#now we calculate the Mean Squared Error
+MSE.nn &lt;- sum((test.r - pr.nn_)^2)/nrow(test.s)
+MSE.nn</code></pre>
+<pre><code>## [1] 143.0844108</code></pre>
+</div>
